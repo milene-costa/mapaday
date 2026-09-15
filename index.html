@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapeador Corporal & Sintomas</title>
+    <style>
+        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #f4f7f6; color: #333; margin: 0; padding: 20px; display: flex; justify-content: center; }
+        .app-container { max-width: 480px; width: 100%; background: white; padding: 25px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.08); }
+        h1 { font-size: 1.4rem; color: #2c3e50; text-align: center; margin-bottom: 8px; }
+        p.subtitle { text-align: center; color: #666; font-size: 0.9rem; margin-bottom: 20px; }
+        .step { display: none; }
+        .step.active { display: block; }
+        label { display: block; font-weight: 600; margin-bottom: 8px; color: #444; }
+        select, input, button { width: 100%; padding: 14px; border-radius: 8px; border: 1px solid #ccc; font-size: 1rem; margin-bottom: 15px; }
+        button { background-color: #2e7d32; color: white; border: none; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        button:hover { background-color: #1b5e20; }
+        .result-card { background: #f9fbe7; border-left: 5px solid #827717; padding: 15px; border-radius: 6px; margin-top: 15px; }
+        .result-title { font-weight: bold; font-size: 1.15rem; color: #33691e; margin-bottom: 5px; }
+        .reflection { font-style: italic; background: #ffffff; padding: 12px; border-radius: 6px; border: 1px dashed #ccc; margin-top: 10px; color: #2c3e50; }
+        .cta-btn { background-color: #0288d1; margin-top: 20px; }
+        .cta-btn:hover { background-color: #01579b; }
+        optgroup { font-weight: bold; color: #2c3e50; }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <h1>Mapeador Corporal & Sintomas</h1>
+    <p class="subtitle">Descubra a mensagem emocional por trás da sua dor física</p>
+
+    <!-- ETAPA 1: Seleção de Sintomas -->
+    <div id="step-1" class="step active">
+        <label for="symptomSelect">Selecione o sintoma ou dor física mais frequente:</label>
+        <select id="symptomSelect">
+            <option value="">-- Escolha um sintoma --</option>
+            
+            <optgroup label="Cabeça, Face e Sentidos">
+                <option value="enxaqueca">Enxaqueca / Pressão no Topo da Cabeça</option>
+                <option value="bruxismo">Bruxismo / Travar os Dentes à Noite</option>
+                <option value="labirintite">Labirintite / Tonturas Crônicas</option>
+                <option value="rinite">Rinite Alérgica / Sinusite Crônica</option>
+                <option value="miopia">Miopia Acentuada / Vista Cansada</option>
+            </optgroup>
+
+            <optgroup label="Sistema Digestivo e Metabolismo">
+                <option value="gastrite">Gastrite / Refluxo Gastresofágico</option>
+                <option value="prisao_ventre">Prisão de Ventre / Intestino Preso</option>
+                <option value="intestino_irritavel">Intestino Irritável / Diarreia por Ansiedade</option>
+                <option value="compulsao">Compulsão por Doces e Carboidratos</option>
+                <option value="tireoide">Alterações na Tireoide (Hipo/Hiper)</option>
+            </optgroup>
+
+            <optgroup label="Coluna, Articulações e Músculos">
+                <option value="lombar">Dor na Coluna Lombar / Hérnia de Disco</option>
+                <option value="ciatico">Inflamação no Nervo Ciático</option>
+                <option value="ombros_tendinite">Bursite / Tendinite / Tensão nos Ombros</option>
+                <option value="joelhos">Dores Crônicas nos Joelhos ou Tornozelos</option>
+                <option value="fibromialgia">Fibromialgia / Dores Generalizadas</option>
+            </optgroup>
+
+            <optgroup label="Circulação, Respiração e Hormônios">
+                <option value="asma">Asma / Falta de Ar Emocional</option>
+                <option value="pressao_alta">Hipertensão (Pressão Alta)</option>
+                <option value="colica_spm">Cólicas Uterinas Severas / SPM Intensa</option>
+            </optgroup>
+        </select>
+        <button onclick="goToLeadCapture()">Ver Mensagem do Corpo</button>
+    </div>
+
+    <!-- ETAPA 1.5: Captura de Lead com Envio para o E-mail -->
+    <div id="step-lead" class="step">
+        <label for="leadName">Como podemos te chamar?</label>
+        <input type="text" id="leadName" placeholder="Seu nome" required>
+        
+        <label for="leadPhone">Seu WhatsApp (com DDD):</label>
+        <input type="tel" id="leadPhone" placeholder="Ex: 12999999999" required>
+        
+        <button onclick="processLeadAndShowResult()">Desbloquear Minha Análise</button>
+        <button onclick="resetApp()" style="background:#757575; margin-top: 5px;">Voltar</button>
+    </div>
+
+    <!-- ETAPA 2: Resultado e Leitura Emocional -->
+    <div id="step-2" class="step">
+        <div id="resultOutput"></div>
+        <button class="cta-btn" onclick="sendToWhatsapp()">Agendar Análise Corporal Completa</button>
+        <button onclick="resetApp()" style="background:#757575; margin-top: 5px;">Mapear Outro Sintoma</button>
+    </div>
+</div>
+
+<script>
+    const database = {
+        enxaqueca: { title: "Enxaqueca / Pressão no Topo da Cabeça", bodyLanguage: "Sua mente racional funciona em rotação máxima para não sentir vulnerabilidade. A dor surge quando a energia fica represada na cabeça, cortando a conexão com o sentir.", reflection: "O que você tem tentado resolver só com a razão por medo de ser rejeitado ou exposto?" },
+        bruxismo: { title: "Bruxismo / Travar a Mandíbula", bodyLanguage: "A mandíbula é o ponto de descarga da raiva e da autopreservação. Você racionaliza a invasão durante o dia, mas seu corpo tenta 'morder' a pressão acumulada enquanto dorme.", reflection: "Quanta raiva ou invasão do seu espaço você engoliu de dia, mas seu corpo precisou triturar à noite?" },
+        labirintite: { title: "Labirintite / Tonturas Crônicas", bodyLanguage: "O centro de equilíbrio reage quando o mundo externo parece barulhento, invadido ou imprevisível demais, fazendo a mente desconectar da realidade física.", reflection: "De qual ambiente, cobrança ou pessoa a sua mente está querendo 'fugir'?" },
+        rinite: { title: "Rinite Alérgica / Sinusite Crônica", bodyLanguage: "O nariz é a fronteira de respiração com o mundo. A alergia é uma resposta de defesa exagerada a um ambiente que sua mente percebe como sufocante ou tóxico.", reflection: "Quem ou qual situação no seu ambiente está te fazendo sentir sem espaço para respirar em paz?" },
+        miopia: { title: "Miopia Acentuada / Vista Cansada", bodyLanguage: "Tentativa inconsciente do corpo de 'desfocar' o mundo distante para não ver o que assusta ou machuca, mantendo o foco seguro apenas no seu mundo interno.", reflection: "O que na sua realidade externa está tão desconfortável de olhar que você prefere focar apenas em si mesmo?" },
+        gastrite: { title: "Gastrite / Refluxo Gastresofágico", bodyLanguage: "O estômago é o centro do acolhimento. O refluxo é o ácido tentando 'devolver' situações indigestas que você aceitou calado por medo de ser abandonado.", reflection: "Quantas palavras ou desaforos você engoliu a seco esta semana para não criar conflito e não ficar sozinho?" },
+        prisao_ventre: { title: "Prisão de Ventre Crônica", bodyLanguage: "Sua musculatura aprendeu a reter. O intestino preso reflete o medo inconsciente de soltar, errar e ser julgado ou humilhado publicamente.", reflection: "O que você está segurando com tanto medo dentro de você por receio da crítica externa?" },
+        intestino_irritavel: { title: "Intestino Irritável / Diarreia Emocional", bodyLanguage: "Despejo rápido do conteúdo intestinal pelo pânico do desamparo. Quando a ansiedade transborda, o corpo 'solta tudo' por não conseguir reter e processar.", reflection: "Qual situação de incerteza emocional te causa tanto medo que seu corpo prefere descartar tudo em vez de digerir?" },
+        compulsao: { title: "Compulsão por Doces / Carboidratos", bodyLanguage: "Busca de preenchimento do vazio emocional. A boca é o primeiro contato do bebê com o afeto; na falta de acolhimento, o corpo busca na comida a sensação de nutrição.", reflection: "Qual é a 'fome emocional' que você está tentando saciar com a comida? O que você realmente precisa receber agora?" },
+        tireoide: { title: "Alterações na Tireoide (Hipo/Hipertireoidismo)", bodyLanguage: "Fica na região do estrangulamento da voz. O hipotireoidismo 'desacelera' quando você desiste de falar o que sente; o hipertireoidismo 'acelera' no pânico de não ser ouvido.", reflection: "O que você precisa falar urgentemente para o mundo, mas cala por medo de parecer exigente ou chato?" },
+        lombar: { title: "Dor na Coluna Lombar / Hérnia", bodyLanguage: "A lombar é a base de sustentação do corpo. A dor surge ao carregar responsabilidades, problemas e pesos emocionais que pertencem a outras pessoas.", reflection: "De quem é o peso que você está carregando nas costas porque acredita que ninguém mais vai dar conta?" },
+        ciatico: { title: "Inflamação no Nervo Ciático", bodyLanguage: "O nervo ciático trava o avanço. Ocorre quando você se vê diante de uma decisão importante, mas exige perfeição absoluta e tem medo de escolher a opção errada.", reflection: "Qual escolha importante na sua vida está travada porque você não se permite errar ou falhar?" },
+        ombros_tendinite: { title: "Bursite / Tendinite / Ombros Rígidos", bodyLanguage: "Tensão constante na área de execução. Reflete o excesso de controle, estado de prontidão e a recusa em pedir ajuda para não parecer frágil ou incompetente.", reflection: "Para quem você está tentando provar que dá conta de tudo sozinho? Por que aceitar ajuda te assusta?" },
+        joelhos: { title: "Dores Crônicas nos Joelhos ou Tornozelos", bodyLanguage: "Os joelhos representam a capacidade de curvar-se e ceder. Dores aqui indicam dificuldade em aceitar que não controla tudo e o medo de perder o topo ou a posição de destaque.", reflection: "Onde na sua vida você está sendo inflexível demais por medo de dar o braço a torcer?" },
+        fibromialgia: { title: "Fibromialgia / Dores Generalizadas", bodyLanguage: "Músculos contraídos por anos para suportar a dor e a cobrança em silêncio. O sistema nervoso perdeu a capacidade de relaxar a musculatura por medo da humilhação.", reflection: "Quantos anos de 'aguentar firme sem reclamar' e guardar mágoas estão acumulados no seu corpo hoje?" },
+        asma: { title: "Asma / Falta de Ar Emocional", bodyLanguage: "O pulmão é a troca vital com o mundo. A falta de ar surge do medo da falta de apoio e do sentimento de estar sendo sufocado por obrigações sem receber afeto em troca.", reflection: "Em qual relação você sente que dá todo o seu ar pelo outro, mas nunca é nutrido da mesma forma?" },
+        pressao_alta: { title: "Hipertensão Arterial (Pressão Alta)", bodyLanguage: "Os vasos se enrijecem por excesso de controle, competitividade e alerta constante. A pressão sobe para manter o corpo em estado de alta performance contínua.", reflection: "Você está vivendo como se a vida fosse uma competição sem fim onde nunca pode baixar a guarda?" },
+        colica_spm: { title: "Cólicas Uterinas Severas / SPM Intensa", bodyLanguage: "Dificuldade em entregar-se à vulnerabilidade e aos ciclos naturais. Surge quando a mulher rígida tenta controlar tudo e se pune por não estar produzindo no topo 100% do tempo.", reflection: "Você se permite descansar nos dias em que seu corpo pede pausa, ou você se cobra performance diária impecável?" }
+    };
+
+    let selectedSymptomData = null;
+    let leadInfo = { name: "", phone: "" };
+
+    function goToLeadCapture() {
+        const select = document.getElementById('symptomSelect');
+        if (!select.value) {
+            alert("Por favor, selecione um sintoma.");
+            return;
+        }
+        selectedSymptomData = database[select.value];
+        
+        document.getElementById('step-1').classList.remove('active');
+        document.getElementById('step-lead').classList.add('active');
+    }
+
+    function processLeadAndShowResult() {
+        const name = document.getElementById('leadName').value.trim();
+        const phone = document.getElementById('leadPhone').value.trim();
+
+        if (!name || !phone) {
+            alert("Por favor, preencha seu nome e WhatsApp para ver a análise.");
+            return;
+        }
+
+        leadInfo = { name, phone };
+
+        // Envia os dados para o Formspree em segundo plano (vai para o seu e-mail)
+        fetch('https://formspree.io/f/mqpazpjn', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                name: leadInfo.name,
+                phone: leadInfo.phone,
+                symptom: selectedSymptomData.title
+            })
+        }).catch(error => console.log('Erro ao enviar lead:', error));
+
+        // Renderiza o resultado na tela para o usuário
+        const output = document.getElementById('resultOutput');
+        output.innerHTML = `
+            <p style="font-size: 0.9rem; color: #555; margin-bottom: 5px;">Olá, <strong>${leadInfo.name}</strong>. Aqui está a leitura para:</p>
+            <div class="result-title">${selectedSymptomData.title}</div>
+            <div class="result-card">
+                <strong>O que seu corpo está dizendo:</strong>
+                <p style="margin-top: 5px; font-size: 0.95rem; color: #444; line-height: 1.4;">${selectedSymptomData.bodyLanguage}</p>
+            </div>
+            <div class="reflection">
+                <strong>Pergunta de Reflexão:</strong>
+                <p style="margin-top: 5px; margin-bottom: 0; line-height: 1.4;">"${selectedSymptomData.reflection}"</p>
+            </div>
+        `;
+
+        document.getElementById('step-lead').classList.remove('active');
+        document.getElementById('step-2').classList.add('active');
+    }
+
+    function resetApp() {
+        document.getElementById('step-lead').classList.remove('active');
+        document.getElementById('step-2').classList.remove('active');
+        document.getElementById('step-1').classList.add('active');
+        document.getElementById('symptomSelect').value = "";
+        document.getElementById('leadName').value = "";
+        document.getElementById('leadPhone').value = "";
+    }
+
+    function sendToWhatsapp() {
+        const phone = "5547999331999"; // Seu número configurado
+        const message = encodeURIComponent(`Olá! Meu nome é ${leadInfo.name}. Fiz o teste no Mapeador "${selectedSymptomData.title}" e gostaria de agendar uma Análise Corporal e Sistêmica.`);
+        window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
+    }
+</script>
+
+</body>
+</html>
